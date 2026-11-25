@@ -1,0 +1,27 @@
+{
+  "estaciones": {
+    "Talleres_L1": {
+      "nombre": "Talleres",
+      "linea": 1,
+      "subterranea": false,
+      "ascensor": true,
+      "coords_gps": [25.7541, -100.3653],
+      "coords_mapa_px": [0, 0],
+      "vecinos": [
+        { "destino": "San_Bernabe_L1", "distancia_km": 1.15, "tipo": "tramo" }
+      ]
+    },
+    "San_Bernabe_L1": {
+      "nombre": "San Bernabé",
+      "linea": 1,
+      "subterranea": false,
+      "ascensor": true,
+      "coords_gps": [25.7483, -100.3616],
+      "coords_mapa_px": [0, 0],
+      "vecinos": [
+        { "destino": "Talleres_L1", "distancia_km": 1.15, "tipo": "tramo" },
+        { "destino": "Unidad_Modelo_L1", "distancia_km": 0.95, "tipo": "tramo" }
+      ]
+    }
+  }
+}
