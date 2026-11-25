@@ -1,0 +1,5 @@
+- Metro con ascensor y horarios.
+- Un ascensor para minusvalidos pero solo en las subterraneas y que va a afectar al tiempo.
+- No todos tienen ascensor.
+- Estaciones que no funcionan y recalcula el algoritmo.
+- Dependiendo de la hora la cantidad de gente que haya (frecuencia) y afectará al tiempo.
