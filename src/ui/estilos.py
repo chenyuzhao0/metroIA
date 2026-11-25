@@ -1,0 +1,15 @@
+# Paleta de colores (Modo Oscuro Metrorrey)
+COLOR_FONDO_APP = "#1E1E24"
+COLOR_FONDO_PANEL = "#282A36"
+COLOR_TEXTO_PRINCIPAL = "#F8F8F2"
+COLOR_TEXTO_SECUNDARIO = "#BD93F9"
+COLOR_ACENTO = "#00B4D8"
+COLOR_RUTA_BRILLO = "#00F5D4"
+COLOR_TRANSBORDO = "#FF5555"
+
+# Colores oficiales de las líneas según el plano de Metrorrey
+COLOR_LINEA_1 = "#F5B800"  # Amarilla
+COLOR_LINEA_2 = "#009A44"  # Verde
+COLOR_LINEA_3 = "#E32227"  # Roja
+
+FUENTE_PRINCIPAL = "Segoe UI"
