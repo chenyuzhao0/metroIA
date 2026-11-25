@@ -1,0 +1,24 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+
+# PyCharm / IDEs
+.idea/
+.vscode/
+*.swp
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos temporales y logs
+*.log
+*.tmp
