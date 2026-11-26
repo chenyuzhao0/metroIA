@@ -1,6 +1,1 @@
-# Añadir aquí las dependencias del proyecto (una por línea)
-# Por ejemplo:
-# customtkinter
-# pillow
-# pytest
 PySide6
