@@ -1,10 +1,10 @@
 import os
 from PySide6.QtWidgets import (
     QGraphicsView, QGraphicsScene, QGraphicsEllipseItem,
-    QGraphicsLineItem, QGraphicsTextItem, QGraphicsRectItem
+    QGraphicsLineItem, QGraphicsTextItem, QGraphicsRectItem, QGraphicsPolygonItem
 )
-from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor, QFont
-from PySide6.QtCore import Qt, Signal, QTimer
+from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QColor, QFont, QPolygonF
+from PySide6.QtCore import Qt, Signal, QTimer, QPointF
 
 TIEMPO_TRAMO_SEG = 180.0   # 3 minutos entre estaciones
 TIEMPO_PARADA_SEG = 30.0   # 30 segundos en cada estación
@@ -12,48 +12,48 @@ DT_FRAME_SEG = 0.05
 
 AJUSTES_ETIQUETAS = {
     # Línea 1
-    "Talleres_L1": (14, -10, 0),
-    "San_Bernabe_L1": (14, -10, 0),
-    "Unidad_Modelo_L1": (14, -10, 0),
-    "Aztlan_L1": (14, -10, 0),
-    "Penitenciaria_L1": (-108, -10, 0),
-    "Alfonso_Reyes_L1": (-112, -10, 0),
-    "Mitras_L1": (-62, -10, 0),
-    "Simon_Bolivar_L1": (-114, -10, 0),
-    "Hospital_L1": (-75, -10, 0),
-    "Edison_L1": (-8, 14, 90),
-    "Central_L1": (-8, 14, 90),
-    "Cuauhtemoc_L1": (-48, -32, 0),
-    "Del_Golfo_L1": (-28, -30, 0),
-    "Felix_U_Gomez_L1": (14, -22, 0),
-    "Parque_Fundidora_L1": (-10, 14, 90),
-    "Y_Griega_L1": (-10, 14, 90),
-    "Eloy_Cavazos_L1": (-10, 14, 90),
-    "Lerdo_de_Tejeda_L1": (-10, 14, 90),
-    "Exposicion_L1": (-10, 14, 90),
+    "Talleres_L1": (16, -11, 0),
+    "San_Bernabe_L1": (16, -11, 0),
+    "Unidad_Modelo_L1": (16, -11, 0),
+    "Aztlan_L1": (16, -11, 0),
+    "Penitenciaria_L1": (-115, -11, 0),
+    "Alfonso_Reyes_L1": (-118, -11, 0),
+    "Mitras_L1": (-66, -11, 0),
+    "Simon_Bolivar_L1": (-120, -11, 0),
+    "Hospital_L1": (-78, -11, 0),
+    "Edison_L1": (-9, 16, 90),
+    "Central_L1": (-9, 16, 90),
+    "Cuauhtemoc_L1": (-56, -34, 0),
+    "Del_Golfo_L1": (-30, -30, 0),
+    "Felix_U_Gomez_L1": (16, -24, 0),
+    "Parque_Fundidora_L1": (-9, 16, 90),
+    "Y_Griega_L1": (-9, 16, 90),
+    "Eloy_Cavazos_L1": (-9, 16, 90),
+    "Lerdo_de_Tejeda_L1": (-9, 16, 90),
+    "Exposicion_L1": (-9, 16, 90),
 
     # Línea 2
-    "Sendero_L2": (-76, -10, 0),
-    "Santiago_Tapia_L2": (-114, -10, 0),
-    "San_Nicolas_L2": (-98, -10, 0),
-    "Anahuac_L2": (-78, -10, 0),
-    "Universidad_L2": (-96, -10, 0),
-    "Ninos_Heroes_L2": (-106, -10, 0),
-    "Regina_L2": (-66, -10, 0),
-    "Gral_Anaya_L2": (-94, -10, 0),
-    "Alameda_L2": (14, -10, 0),
-    "Fundadores_L2": (-96, -10, 0),
-    "Padre_Mier_L2": (-10, 14, 90),
-    "Zaragoza_L2": (-10, 14, 90),
+    "Sendero_L2": (-80, -11, 0),
+    "Santiago_Tapia_L2": (-118, -11, 0),
+    "San_Nicolas_L2": (-102, -11, 0),
+    "Anahuac_L2": (-82, -11, 0),
+    "Universidad_L2": (-100, -11, 0),
+    "Ninos_Heroes_L2": (-112, -11, 0),
+    "Regina_L2": (-68, -11, 0),
+    "Gral_Anaya_L2": (-98, -11, 0),
+    "Alameda_L2": (16, -11, 0),
+    "Fundadores_L2": (-100, -11, 0),
+    "Padre_Mier_L2": (-9, 16, 90),
+    "Zaragoza_L2": (-9, 16, 90),
 
     # Línea 3
-    "Santa_Lucia_L3": (-10, 14, 90),
-    "Col_Obrera_L3": (-96, -10, 0),
-    "Metalurgicos_L3": (14, -10, 0),
-    "Col_Moderna_L3": (14, -10, 0),
-    "Ruiz_Cortines_L3": (14, -10, 0),
-    "Los_Angeles_L3": (14, -10, 0),
-    "Hospital_Metropolitano_L3": (14, -14, 0),
+    "Santa_Lucia_L3": (-9, 16, 90),
+    "Col_Obrera_L3": (-100, -11, 0),
+    "Metalurgicos_L3": (16, -11, 0),
+    "Col_Moderna_L3": (16, -11, 0),
+    "Ruiz_Cortines_L3": (16, -11, 0),
+    "Los_Angeles_L3": (16, -11, 0),
+    "Hospital_Metropolitano_L3": (16, -14, 0),
 }
 
 
@@ -70,8 +70,8 @@ class TrenAnimado:
 
 
 class MapaMetrorreyView(QGraphicsView):
-    estacion_clicada = Signal(str)          # Clic izquierdo: seleccionar origen/destino
-    estacion_toggle_corte = Signal(str)     # Clic derecho: cortar/abrir estación
+    estacion_clicada = Signal(str)
+    estacion_toggle_corte = Signal(str)
 
     def __init__(self, datos_red, ruta_imagen="assets/plano_metrorrey.png"):
         super().__init__()
@@ -92,7 +92,7 @@ class MapaMetrorreyView(QGraphicsView):
         self.setRenderHint(QPainter.SmoothPixmapTransform)
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
-        self.setStyleSheet("border: 1px solid #CBD5E1; border-radius: 10px; background-color: #EAE5DC;")
+        self.setStyleSheet("border: 1px solid #CBD5E1; border-radius: 12px; background-color: #EBE6DD;")
 
         self._cargar_fondo_o_esquema(ruta_imagen)
         self._dibujar_estado_cortes()
@@ -105,15 +105,77 @@ class MapaMetrorreyView(QGraphicsView):
             self.scene.addPixmap(pixmap)
             self.setSceneRect(pixmap.rect())
         else:
-            self.setSceneRect(310, 120, 880, 760)
+            # Lienzo amplio para que no se corte ni Padre Mier abajo ni el monigote arriba
+            self.setSceneRect(220, 110, 1020, 810)
+            self._dibujar_decoracion_plano()
             self._dibujar_lineas_base()
-            self._dibujar_leyenda_esquema()
+            self._dibujar_tarjeta_simbologia()
+
+    def _dibujar_decoracion_plano(self):
+        """Dibuja elementos arquitectónicos del plano oficial: retícula sutil, cabecera Metrorrey y rosa de los vientos."""
+        # Retícula suave de fondo tipo plano urbano
+        pen_grid = QPen(QColor(214, 208, 196, 130), 1)
+        for gx in range(240, 1240, 80):
+            l = QGraphicsLineItem(gx, 110, gx, 920)
+            l.setPen(pen_grid)
+            l.setZValue(0)
+            self.scene.addItem(l)
+        for gy in range(130, 920, 80):
+            l = QGraphicsLineItem(220, gy, 1240, gy)
+            l.setPen(pen_grid)
+            l.setZValue(0)
+            self.scene.addItem(l)
+
+        # Emblema superior derecho estilo Metrorrey
+        badge_bg = QGraphicsRectItem(995, 135, 215, 62)
+        badge_bg.setBrush(QBrush(QColor("#FFFFFF")))
+        badge_bg.setPen(QPen(QColor("#0F2C59"), 2.5))
+        badge_bg.setZValue(2)
+        self.scene.addItem(badge_bg)
+
+        logo_m = QGraphicsTextItem("m")
+        logo_m.setDefaultTextColor(QColor("#E11D48"))
+        logo_m.setFont(QFont("Arial Black", 26, QFont.Black))
+        logo_m.setPos(1006, 133)
+        logo_m.setZValue(3)
+        self.scene.addItem(logo_m)
+
+        logo_txt = QGraphicsTextItem("METRORREY\nRed Metro · L1 · L2 · L3")
+        logo_txt.setDefaultTextColor(QColor("#0F2C59"))
+        logo_txt.setFont(QFont("Segoe UI", 9, QFont.Bold))
+        logo_txt.setPos(1056, 145)
+        logo_txt.setZValue(3)
+        self.scene.addItem(logo_txt)
+
+        # Rosa de los vientos (Norte) en la parte inferior central-izquierda
+        nx, ny = 490, 795
+        aguja_norte = QPolygonF([QPointF(nx, ny - 26), QPointF(nx - 8, ny), QPointF(nx + 8, ny)])
+        poly_n = QGraphicsPolygonItem(aguja_norte)
+        poly_n.setBrush(QBrush(QColor("#DC2626")))
+        poly_n.setPen(QPen(Qt.NoPen))
+        poly_n.setZValue(2)
+        self.scene.addItem(poly_n)
+
+        aguja_sur = QPolygonF([QPointF(nx, ny + 26), QPointF(nx - 8, ny), QPointF(nx + 8, ny)])
+        poly_s = QGraphicsPolygonItem(aguja_sur)
+        poly_s.setBrush(QBrush(QColor("#94A3B8")))
+        poly_s.setPen(QPen(Qt.NoPen))
+        poly_s.setZValue(2)
+        self.scene.addItem(poly_s)
+
+        lbl_n = QGraphicsTextItem("N")
+        lbl_n.setDefaultTextColor(QColor("#0F2C59"))
+        lbl_n.setFont(QFont("Segoe UI", 11, QFont.Black))
+        lbl_n.setPos(nx - 9, ny + 24)
+        lbl_n.setZValue(2)
+        self.scene.addItem(lbl_n)
 
     def _dibujar_lineas_base(self):
+        """Dibuja las vías con contorno sutil y trazo limpio."""
         colores_linea = {
-            1: QColor("#F59E0B"),
-            2: QColor("#16A34A"),
-            3: QColor("#EA580C"),
+            1: QColor("#F59E0B"),  # Línea 1 - Amarillo
+            2: QColor("#16A34A"),  # Línea 2 - Verde
+            3: QColor("#EA580C"),  # Línea 3 - Rojo/Naranja
         }
         for con in self.conexiones:
             est_o = self.estaciones.get(con["origen"])
@@ -124,27 +186,75 @@ class MapaMetrorreyView(QGraphicsView):
             x2, y2 = est_d["px"]
             color = colores_linea.get(est_o["linea"], QColor("#64748B"))
 
-            pen_via = QPen(color, 6, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
+            # Sombra/borde blanco para que la vía destaque sobre el fondo
+            sombra_via = QGraphicsLineItem(x1, y1, x2, y2)
+            sombra_via.setPen(QPen(QColor("#FFFFFF"), 10, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+            sombra_via.setZValue(1)
+            self.scene.addItem(sombra_via)
+
             tramo = QGraphicsLineItem(x1, y1, x2, y2)
-            tramo.setPen(pen_via)
+            tramo.setPen(QPen(color, 6.5, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
             tramo.setZValue(2)
             self.scene.addItem(tramo)
 
-    def _dibujar_leyenda_esquema(self):
-        leyenda = QGraphicsTextItem(
-            "SIMBOLOGÍA METRORREY\n"
-            "🟡 Línea 1 (Talleres – Exposición)\n"
-            "🟢 Línea 2 (Sendero – Gral. I. Zaragoza)\n"
-            "🔴 Línea 3 (Gral. I. Zaragoza – Hosp. Metropolitano)\n"
-            "♿ Estación con ascensor disponible\n"
-            "🧍 Estás aquí (Origen seleccionado)\n"
-            "🖱️ Clic izq: info/seleccionar · Clic der: cortar/abrir"
+    def _dibujar_tarjeta_simbologia(self):
+        """Tarjeta oficial de simbología en la esquina inferior izquierda (sin estorbar a Talleres)."""
+        sx, sy = 240, 625
+        ancho, alto = 215, 245
+
+        caja = QGraphicsRectItem(sx, sy, ancho, alto)
+        caja.setBrush(QBrush(QColor("#FFFFFF")))
+        caja.setPen(QPen(QColor("#0F2C59"), 2))
+        caja.setZValue(2)
+        self.scene.addItem(caja)
+
+        cabecera = QGraphicsRectItem(sx, sy, ancho, 28)
+        cabecera.setBrush(QBrush(QColor("#0F2C59")))
+        cabecera.setPen(QPen(Qt.NoPen))
+        cabecera.setZValue(3)
+        self.scene.addItem(cabecera)
+
+        tit = QGraphicsTextItem("SIMBOLOGÍA")
+        tit.setDefaultTextColor(QColor("#FFFFFF"))
+        tit.setFont(QFont("Segoe UI", 9, QFont.Bold))
+        tit.setPos(sx + 62, sy + 3)
+        tit.setZValue(4)
+        self.scene.addItem(tit)
+
+        items_leyenda = [
+            ("#F59E0B", "Línea 1 (Talleres – Exposición)"),
+            ("#16A34A", "Línea 2 (Sendero – Zaragoza)"),
+            ("#EA580C", "Línea 3 (Zaragoza – H. Metrop.)"),
+        ]
+        y_curr = sy + 38
+        for hex_col, nombre_l in items_leyenda:
+            linea_muestra = QGraphicsLineItem(sx + 12, y_curr + 9, sx + 32, y_curr + 9)
+            linea_muestra.setPen(QPen(QColor(hex_col), 5, Qt.SolidLine, Qt.RoundCap))
+            linea_muestra.setZValue(4)
+            self.scene.addItem(linea_muestra)
+
+            txt = QGraphicsTextItem(nombre_l)
+            txt.setDefaultTextColor(QColor("#1E293B"))
+            txt.setFont(QFont("Segoe UI", 8, QFont.Bold))
+            txt.setPos(sx + 38, y_curr - 1)
+            txt.setZValue(4)
+            self.scene.addItem(txt)
+            y_curr += 24
+
+        notas = QGraphicsTextItem(
+            "◎  Estación de transbordo\n"
+            "♿  Ascensor disponible\n"
+            "🧍  Estación de origen actual\n"
+            "⛔  Tramo/estación cortada\n"
+            "────────────────────\n"
+            "🖱️ Clic izq: ficha / elegir\n"
+            "🖱️ Clic der: cortar / abrir"
         )
-        leyenda.setDefaultTextColor(QColor("#0F2C59"))
-        leyenda.setFont(QFont("Segoe UI", 9, QFont.Bold))
-        leyenda.setPos(325, 135)
-        leyenda.setZValue(3)
-        self.scene.addItem(leyenda)
+        notas.setDefaultTextColor(QColor("#334155"))
+        notas.setFont(QFont("Segoe UI", 8))
+        notas.setPos(sx + 10, y_curr + 2)
+        notas.setZValue(4)
+        self.scene.addItem(notas)
 
     def _dibujar_estado_cortes(self):
         for item in self.items_cortes:
@@ -175,15 +285,24 @@ class MapaMetrorreyView(QGraphicsView):
             2: QColor("#16A34A"),
             3: QColor("#EA580C"),
         }
+        transbordos_ids = {
+            "Cuauhtemoc_L1", "Cuauhtemoc_L2",
+            "Zaragoza_L2", "Zaragoza_L3",
+            "Felix_U_Gomez_L1", "Felix_U_Gomez_L3"
+        }
         for est_id, nodo in self.nodos_graficos.items():
             info = self.estaciones[est_id]
             cortada = info.get("cortada", False)
             if cortada:
                 nodo.setBrush(QBrush(QColor("#1E293B")))
                 nodo.setPen(QPen(QColor("#EF4444"), 3))
+            elif est_id in transbordos_ids:
+                # Estaciones de transbordo con anillo blanco interior y borde azul marino
+                nodo.setBrush(QBrush(QColor("#FFFFFF")))
+                nodo.setPen(QPen(QColor("#0F2C59"), 3.5))
             else:
                 nodo.setBrush(QBrush(colores_linea.get(info["linea"], QColor("#0F172A"))))
-                nodo.setPen(QPen(QColor("#FFFFFF"), 2))
+                nodo.setPen(QPen(QColor("#FFFFFF"), 2.2))
 
     def _dibujar_nodos_y_nombres(self):
         coordenadas_etiquetadas = set()
@@ -193,15 +312,17 @@ class MapaMetrorreyView(QGraphicsView):
             if info.get("ascensor", False):
                 ascensor_por_px[px_key] = True
 
+        transbordos_ids = {
+            "Cuauhtemoc_L1", "Cuauhtemoc_L2",
+            "Zaragoza_L2", "Zaragoza_L3",
+            "Felix_U_Gomez_L1", "Felix_U_Gomez_L3"
+        }
+
         for est_id, info in self.estaciones.items():
             x, y = info["px"]
             px_key = (x, y)
-            es_transbordo = est_id in {
-                "Cuauhtemoc_L1", "Cuauhtemoc_L2",
-                "Zaragoza_L2", "Zaragoza_L3",
-                "Felix_U_Gomez_L1", "Felix_U_Gomez_L3"
-            }
-            radio = 10 if es_transbordo else 8
+            es_transbordo = est_id in transbordos_ids
+            radio = 11 if es_transbordo else 8
 
             nodo = QGraphicsEllipseItem(x - radio, y - radio, radio * 2, radio * 2)
             nodo.setCursor(Qt.PointingHandCursor)
@@ -221,7 +342,7 @@ class MapaMetrorreyView(QGraphicsView):
                 etiqueta.setDefaultTextColor(QColor("#0F2C59"))
                 etiqueta.setFont(QFont("Segoe UI", 8, QFont.Bold))
 
-                dx, dy, rot = AJUSTES_ETIQUETAS.get(est_id, (12, -10, 0))
+                dx, dy, rot = AJUSTES_ETIQUETAS.get(est_id, (14, -11, 0))
                 etiqueta.setPos(x + dx, y + dy)
                 etiqueta.setRotation(rot)
                 etiqueta.setZValue(9)
@@ -229,7 +350,6 @@ class MapaMetrorreyView(QGraphicsView):
 
         self.actualizar_estilos_nodos()
 
-    # --- MONIGOTE "ESTÁS AQUÍ" EN LA ESTACIÓN DE ORIGEN ---
     def marcar_origen_monigote(self, est_id):
         for item in self.items_monigote:
             self.scene.removeItem(item)
@@ -240,20 +360,18 @@ class MapaMetrorreyView(QGraphicsView):
 
         x, y = self.estaciones[est_id]["px"]
 
-        # Halo pulsante alrededor del origen
-        halo = QGraphicsEllipseItem(x - 15, y - 15, 30, 30)
-        halo.setBrush(QBrush(QColor(16, 185, 129, 70)))
+        halo = QGraphicsEllipseItem(x - 16, y - 16, 32, 32)
+        halo.setBrush(QBrush(QColor(16, 185, 129, 75)))
         halo.setPen(QPen(QColor("#10B981"), 2.5))
         halo.setZValue(18)
 
-        # Bocadillo "Estás aquí"
         texto = QGraphicsTextItem("🧍 Estás aquí")
         texto.setDefaultTextColor(QColor("#FFFFFF"))
         texto.setFont(QFont("Segoe UI", 8.5, QFont.Bold))
         rect_txt = texto.boundingRect()
 
         bx = x - rect_txt.width() / 2
-        by = y - 46
+        by = y - 48
 
         fondo_bocadillo = QGraphicsRectItem(bx - 6, by - 2, rect_txt.width() + 12, rect_txt.height() + 4)
         fondo_bocadillo.setBrush(QBrush(QColor("#0F2C59")))
@@ -263,8 +381,7 @@ class MapaMetrorreyView(QGraphicsView):
         texto.setPos(bx, by)
         texto.setZValue(26)
 
-        # Puntero triangular/línea hacia la bola
-        puntero = QGraphicsLineItem(x, by + rect_txt.height() + 2, x, y - 10)
+        puntero = QGraphicsLineItem(x, by + rect_txt.height() + 2, x, y - 11)
         puntero.setPen(QPen(QColor("#0F2C59"), 2.5))
         puntero.setZValue(24)
 
@@ -274,7 +391,6 @@ class MapaMetrorreyView(QGraphicsView):
         self.scene.addItem(texto)
         self.items_monigote.extend([halo, puntero, fondo_bocadillo, texto])
 
-    # --- TARJETA DE DESCRIPCIÓN AL PINCHAR EN UNA ESTACIÓN ---
     def mostrar_tarjeta_estacion(self, est_id):
         self.cerrar_tarjeta_estacion()
         if est_id not in self.estaciones:
@@ -283,7 +399,6 @@ class MapaMetrorreyView(QGraphicsView):
         info = self.estaciones[est_id]
         x, y = info["px"]
 
-        # Comprobar si es estación de transbordo
         transbordos_info = []
         for t in self.datos_red.get("transbordos", []):
             if t["origen"] == est_id or t["destino"] == est_id:
@@ -312,9 +427,8 @@ class MapaMetrorreyView(QGraphicsView):
         texto_item.setFont(QFont("Segoe UI", 8.5))
         rect = texto_item.boundingRect()
 
-        # Colocar la tarjeta a la derecha de la estación (o a la izquierda si está muy pegada al borde derecho)
         px_card = x + 18 if x < 920 else x - rect.width() - 28
-        py_card = max(135, min(y - 20, 720))
+        py_card = max(135, min(y - 20, 740))
 
         caja = QGraphicsRectItem(px_card, py_card, rect.width() + 16, rect.height() + 12)
         caja.setBrush(QBrush(QColor("#FFFFFF")))
@@ -460,7 +574,6 @@ class MapaMetrorreyView(QGraphicsView):
                 self.estacion_toggle_corte.emit(est_id)
                 self.mostrar_tarjeta_estacion(est_id)
         else:
-            # Si pincha en el fondo vacío del mapa, cerramos la ficha flotante
             if event.button() == Qt.LeftButton:
                 self.cerrar_tarjeta_estacion()
         super().mousePressEvent(event)
@@ -470,6 +583,7 @@ class MapaMetrorreyView(QGraphicsView):
         if not lista_ids_estaciones or len(lista_ids_estaciones) < 2:
             return
 
+        pen_halo = QPen(QColor(56, 189, 248, 95), 16, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
         pen_borde = QPen(QColor("#0F2C59"), 10, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
         pen_centro = QPen(QColor("#38BDF8"), 5, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
 
@@ -482,6 +596,10 @@ class MapaMetrorreyView(QGraphicsView):
                 if (x1, y1) == (x2, y2):
                     continue
 
+                linea_halo = QGraphicsLineItem(x1, y1, x2, y2)
+                linea_halo.setPen(pen_halo)
+                linea_halo.setZValue(4.5)
+
                 linea_ext = QGraphicsLineItem(x1, y1, x2, y2)
                 linea_ext.setPen(pen_borde)
                 linea_ext.setZValue(5)
@@ -490,15 +608,15 @@ class MapaMetrorreyView(QGraphicsView):
                 linea_int.setPen(pen_centro)
                 linea_int.setZValue(6)
 
+                self.scene.addItem(linea_halo)
                 self.scene.addItem(linea_ext)
                 self.scene.addItem(linea_int)
-                self.items_ruta.extend([linea_ext, linea_int])
+                self.items_ruta.extend([linea_halo, linea_ext, linea_int])
 
-        # Destino en rojo intenso (el origen ya tiene el monigote "Estás aquí")
         dest_id = lista_ids_estaciones[-1]
         if dest_id in self.estaciones:
             x, y = self.estaciones[dest_id]["px"]
-            marcador = QGraphicsEllipseItem(x - 12, y - 12, 24, 24)
+            marcador = QGraphicsEllipseItem(x - 13, y - 13, 26, 26)
             marcador.setBrush(QBrush(QColor("#EF4444")))
             marcador.setPen(QPen(QColor("#FFFFFF"), 3))
             marcador.setZValue(15)

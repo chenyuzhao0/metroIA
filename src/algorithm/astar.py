@@ -1,16 +1,42 @@
 import heapq
-from src.model.grafo import construir_adyacencia,obtener_coordenadas,obtener_vecinos
+from src.model.grafo import (
+    construir_adyacencia, obtener_coordenadas,
+    obtener_vecinos, es_estacion_accesible
+)
 from src.algorithm.heuristica import heuristica_tiempo_min
 
-def calcular_ruta_astar(parametros,heuristica=heuristica_tiempo_min):
+
+def calcular_ruta_astar(parametros, heuristica=heuristica_tiempo_min):
     origen = parametros["origen"]
     destino = parametros["destino"]
     datos_red = parametros["datos_red"]
     estaciones = datos_red["estaciones"]
+    movilidad_reducida = parametros.get("movilidad_reducida", False)
     adyacencia = construir_adyacencia(datos_red)
+
     if estaciones[origen].get("cortada", False) or estaciones[destino].get("cortada", False):
-        return {"ruta":[], "tiempo_total": None, "transbordos": [], "coste_g": None, "nodos_expandidos":0}
-    coord_destino = obtener_coordenadas(estaciones,destino)
+        return {
+            "ruta": [], "tiempo_total": None, "transbordos": [],
+            "coste_g": None, "nodos_expandidos": 0,
+            "mensaje_error": "La estación de origen o de destino está cortada."
+        }
+
+    # Validación de accesibilidad en origen y destino
+    if movilidad_reducida:
+        if not es_estacion_accesible(estaciones[origen]):
+            return {
+                "ruta": [], "tiempo_total": None, "transbordos": [],
+                "coste_g": None, "nodos_expandidos": 0,
+                "mensaje_error": f"Origen no accesible: '{estaciones[origen]['nombre']}' es subterránea y no tiene ascensor."
+            }
+        if not es_estacion_accesible(estaciones[destino]):
+            return {
+                "ruta": [], "tiempo_total": None, "transbordos": [],
+                "coste_g": None, "nodos_expandidos": 0,
+                "mensaje_error": f"Destino no accesible: '{estaciones[destino]['nombre']}' es subterránea y no tiene ascensor."
+            }
+
+    coord_destino = obtener_coordenadas(estaciones, destino)
 
     abierta = []
     cerrada = set()
@@ -18,8 +44,8 @@ def calcular_ruta_astar(parametros,heuristica=heuristica_tiempo_min):
     padres = {origen: None}
     contador = 0
     nodos_expandidos = 0
-    h_inicial = heuristica(obtener_coordenadas(estaciones,origen),coord_destino)
-    heapq.heappush(abierta,(h_inicial,0.0,contador,origen))
+    h_inicial = heuristica(obtener_coordenadas(estaciones, origen), coord_destino)
+    heapq.heappush(abierta, (h_inicial, 0.0, contador, origen))
 
     while abierta:
         f_actual, g_actual, _, actual = heapq.heappop(abierta)
@@ -29,35 +55,45 @@ def calcular_ruta_astar(parametros,heuristica=heuristica_tiempo_min):
             break
         cerrada.add(actual)
         nodos_expandidos += 1
-        for vecino,coste_arista, _ in obtener_vecinos(estaciones,adyacencia,actual,parametros):
+
+        for vecino, coste_arista, _ in obtener_vecinos(estaciones, adyacencia, actual, parametros):
             if vecino in cerrada:
                 continue
             nuevo_g = g_actual + coste_arista
             if vecino not in g_score or nuevo_g < g_score[vecino]:
                 g_score[vecino] = nuevo_g
                 padres[vecino] = actual
-                h_val = heuristica(obtener_coordenadas(estaciones,vecino),coord_destino)
+                h_val = heuristica(obtener_coordenadas(estaciones, vecino), coord_destino)
                 contador += 1
-                heapq.heappush(abierta,(nuevo_g + h_val, nuevo_g, contador, vecino))
-
+                heapq.heappush(abierta, (nuevo_g + h_val, nuevo_g, contador, vecino))
 
     if destino not in padres:
-        return {"ruta":[], "tiempo_total": None, "transbordos": [],"coste_g": None, "nodos_expandidos":nodos_expandidos}
+        motivo = (
+            "No existe ninguna ruta accesible (con ascensor o no subterránea) disponible con los cortes actuales."
+            if movilidad_reducida
+            else "No existe ninguna ruta disponible debido a estaciones o tramos cortados."
+        )
+        return {
+            "ruta": [], "tiempo_total": None, "transbordos": [],
+            "coste_g": None, "nodos_expandidos": nodos_expandidos,
+            "mensaje_error": motivo
+        }
 
     ruta = []
     nodo = destino
     while nodo is not None:
         ruta.append(nodo)
         nodo = padres[nodo]
-
     ruta.reverse()
 
     transbordos = []
-    for i in range(len(ruta)-1):
+    for i in range(len(ruta) - 1):
         u = ruta[i]
-        v = ruta[i+1]
+        v = ruta[i + 1]
         if estaciones[u]["linea"] != estaciones[v]["linea"]:
-            transbordos.append(f"{estaciones[u]['nombre']} (L{estaciones[u]['linea']} -> L{estaciones[v]['linea']})")
+            transbordos.append(
+                f"{estaciones[u]['nombre']} (L{estaciones[u]['linea']} -> L{estaciones[v]['linea']})"
+            )
 
     return {
         "ruta": ruta,
@@ -65,4 +101,5 @@ def calcular_ruta_astar(parametros,heuristica=heuristica_tiempo_min):
         "transbordos": transbordos,
         "coste_g": g_score[destino],
         "nodos_expandidos": nodos_expandidos,
+        "mensaje_error": None
     }
