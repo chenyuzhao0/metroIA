@@ -592,7 +592,7 @@ class MainWindow(QMainWindow):
         self.mapa_view.dibujar_ruta(ruta)
         self.lista_pasos.clear()
 
-        minutos_redondeados = max(1, round(tiempo_total))
+        minutos_redondeados = 0 if tiempo_total == 0 else max(1,round(tiempo_total))
         hora_llegada = self.time_salida.time().addSecs(minutos_redondeados * 60).toString("HH:mm")
 
         self.val_tiempo.setText(f"{minutos_redondeados} min")

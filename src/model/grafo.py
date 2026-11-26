@@ -49,17 +49,11 @@ def obtener_vecinos(estaciones, adyacencia, nodo_actual, opciones):
 
     if estaciones[nodo_actual].get("cortada", False):
         return []
-    if movilidad_reducida and not es_estacion_accesible(estaciones[nodo_actual]):
-        return []
 
     resultado = []
     for arista in adyacencia[nodo_actual]:
         vecino = arista["destino"]
         if arista["cortada"] or estaciones[vecino].get("cortada", False):
-            continue
-
-        # Restricción estricta de movilidad reducida
-        if movilidad_reducida and not es_estacion_accesible(estaciones[vecino]):
             continue
 
         if arista["tipo"] == "tramo":
