@@ -18,7 +18,7 @@ Práctica de Inteligencia Artificial (curso 2026-27): aplicación con interfaz g
 1. Clonar el repositorio:
    ```bash
    git clone https://github.com/chenyuzhao0/metroIA
-   cd metrorrey
+   cd metroIA
    ```
 
 2. Crear y activar el entorno virtual:
