@@ -39,9 +39,3 @@ Práctica de Inteligencia Artificial (curso 2026-27): aplicación con interfaz g
    ```bash
    python main.py
    ```
-
-## Flujo de trabajo en equipo (Git)
-
-- No trabajar directamente sobre `main`.
-- Crear una rama por módulo o tarea (`git checkout -b feature/datos`, `feature/algoritmo`, `feature/interfaz`, etc.).
-- Integrar cambios mediante Pull Requests revisadas por otro compañero.

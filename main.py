@@ -10,7 +10,7 @@ def main() -> None:
     app = QApplication(sys.argv)
     ventana = MainWindow(callback_calcular_ruta=calcular_ruta_astar)
     ventana.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 if __name__ == "__main__":
     main()
