@@ -17,7 +17,7 @@ Práctica de Inteligencia Artificial (curso 2026-27): aplicación con interfaz g
 
 1. Clonar el repositorio:
    ```bash
-   git clone <URL_DEL_REPOSITORIO>
+   git clone https://github.com/chenyuzhao0/metroIA
    cd metrorrey
    ```
 
@@ -28,6 +28,8 @@ Práctica de Inteligencia Artificial (curso 2026-27): aplicación con interfaz g
    source .venv/bin/activate
    # En Windows (PowerShell):
    .venv\Scripts\Activate.ps1
+   # En Windows (cmd/powershell):
+   .venv\Scripts\activate
    ```
 
 3. Instalar dependencias:
